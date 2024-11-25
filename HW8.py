@@ -1,6 +1,6 @@
 import pickle
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Field:
@@ -106,9 +106,22 @@ class AddressBook(UserDict):
                 bday = datetime.strptime(record.birthday.value, "%d.%m.%Y")
                 this_year_bday = bday.replace(year=today.year)
 
-                if 0 <= (this_year_bday - today).days <= 7:
-                    upcoming_birthdays.append(f"{record.name.value}: {this_year_bday.strftime('%d.%m.%Y')}")
+                if this_year_bday < today:
+                    this_year_bday = this_year_bday.replace(year=today.year + 1)
 
+                congrats_date = this_year_bday
+                if this_year_bday.weekday() == 5:
+                    congrats_date += timedelta(days=2)  
+                elif this_year_bday.weekday() == 6:  
+                    congrats_date += timedelta(days=1)  
+
+            
+                days_until_congrats = (congrats_date - today).days
+
+                if 0 <= days_until_congrats <= 7:
+                    upcoming_birthdays.append(
+                        f"{record.name.value}: {congrats_date.strftime('%d.%m.%Y')}"
+                )
         if not upcoming_birthdays:
             return "No birthdays in the next week."
 
